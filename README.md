@@ -14,6 +14,9 @@ Various common nodes have an unusual behaviour:
 * Player killing
 	* You get all special nodes from the killed player
 
+Warning! As soon your inventory is full, "random" items will be taken and
+dropped to free space.
+
 There is no `/clearinv`, so you need to find a way how to get rid of the
 huge node quantities.
 

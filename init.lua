@@ -1,9 +1,43 @@
 -- For player killing
 local registered_nodes = {}
 
-local handle_node_drops = minetest.handle_node_drops
-
 minetest.registered_chatcommands["clearinv"] = nil
+
+-- Evil function
+-- Drops "worthy" items from the inventory as soon it's full
+local handle_node_drops = minetest.handle_node_drops
+local function to_inventory_or_drop(pos, drop_list, digger)
+	if not minetest.is_player(digger) then
+		return handle_node_drops(pos, drop_list, digger)
+	end
+
+	local inv = digger:get_inventory()
+	local main_list = inv:get_list("main")
+	-- Get all inventory locations to replace when it's full
+	local pos_non_registered = {}
+	for i, stack in ipairs(main_list) do
+		if not registered_nodes[stack:get_name()] then
+			table.insert(pos_non_registered, i)
+		end
+	end
+
+	local leftover_list = {}
+	for i, stack in ipairs(drop_list) do
+		local leftover = inv:add_item("main", stack)
+		if not leftover:is_empty() then
+			-- Fit it somewhere
+			local j = pos_non_registered[math.random(0, #pos_non_registered)]
+			if j then
+				-- Throw something "worthy" from the inventory
+				local to_swap = inv:get_stack("main", j)
+				inv:set_stack("main", j, leftover)
+				table.insert(leftover_list, to_swap)
+			end
+			table.insert(leftover_list, leftover)
+		end
+	end
+	handle_node_drops(pos, leftover_list, nil)
+end
 
 -- Stores the (amount of nodes / 2) count in param2
 local function add_drop_mechanism(node_name)
@@ -37,7 +71,7 @@ local function add_drop_mechanism(node_name)
 				count = (count - 1) * (math.random() * 0.35 + 2.8)
 			end
 			drop_stack:set_count(math.floor(count + 0.5) * drop_count)
-			handle_node_drops(pos, {drop_stack}, digger)
+			to_inventory_or_drop(pos, {drop_stack}, digger)
 
 			if old_after_dig_node then
 				old_after_dig_node(pos, oldnode, oldmetadata, digger)
@@ -78,7 +112,6 @@ add_drop_mechanism("default:gravel")
 add_drop_mechanism("default:ice")
 add_drop_mechanism("default:snow")
 add_drop_mechanism("default:stone")
-add_drop_mechanism_group("leaves")
 add_drop_mechanism_group("sand")
 add_drop_mechanism_group("soil")
 
@@ -104,7 +137,7 @@ minetest.register_on_punchplayer(function(player, hitter, _a, _b, _c, damage)
 			inv:set_list(list_name, list)
 		end
 	end
-	handle_node_drops(player:get_pos(), drops, hitter)
+	to_inventory_or_drop(player:get_pos(), drops, hitter)
 end)
 
 if minetest.registered_nodes["basic_materials:oil_extract"] then
