@@ -1,6 +1,6 @@
-# item_party
+# Item Party
 
-The probably worst economic Minetest mod.
+The probably worst economic Minetest mod.    
 Various common nodes have an unusual behaviour:
 
 * Node digging
@@ -14,7 +14,7 @@ Various common nodes have an unusual behaviour:
 * Player killing
 	* You get all special nodes from the killed player
 
-Warning! As soon your inventory is full, "random" items will be taken and
+**Warning:** As soon your inventory is full, "random" items will be taken and
 dropped to free space.
 
 There is no `/clearinv`, so you need to find a way how to get rid of the
@@ -24,7 +24,6 @@ huge node quantities.
 
 `item_drop` is a nice addition to this annoying mod. You can prevent players
 from doing something serious by feeding them useless items.
-
 
 ## Licensing
 
